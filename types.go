@@ -38,6 +38,23 @@ const (
 	JobStatusFailed     JobStatus = "failed"
 )
 
+// WithdrawalStatus is the lifecycle state for a withdrawal request.
+type WithdrawalStatus string
+
+const (
+	WithdrawalStatusCreated         WithdrawalStatus = "created"
+	WithdrawalStatusPendingApproval WithdrawalStatus = "pending_approval"
+	WithdrawalStatusApproved        WithdrawalStatus = "approved"
+	WithdrawalStatusFundingRequired WithdrawalStatus = "funding_required"
+	WithdrawalStatusFunding         WithdrawalStatus = "funding"
+	WithdrawalStatusSigning         WithdrawalStatus = "signing"
+	WithdrawalStatusCompleted       WithdrawalStatus = "completed"
+	WithdrawalStatusFailed          WithdrawalStatus = "failed"
+	WithdrawalStatusCancelled       WithdrawalStatus = "cancelled"
+	WithdrawalStatusManualReview    WithdrawalStatus = "manual_review"
+	WithdrawalStatusRejected        WithdrawalStatus = "rejected"
+)
+
 // ── Chains ────────────────────────────────────────────────────────────────────
 
 // Chain represents a supported EVM chain.
@@ -180,4 +197,51 @@ type StablecoinBalanceResult struct {
 	Balance    string `json:"balance"`
 	RawBalance string `json:"raw_balance"`
 	ChainID    string `json:"chain_id,omitempty"`
+}
+
+// ── Withdrawals ──────────────────────────────────────────────────────────────
+
+// CreateWithdrawalPayload is the request body for creating a withdrawal.
+type CreateWithdrawalPayload struct {
+	UserID         string         `json:"user_id"`
+	Asset          string         `json:"asset"`
+	ChainType      ChainType      `json:"chain_type"`
+	ChainName      string         `json:"chain_name,omitempty"`
+	ChainID        string         `json:"chain_id,omitempty"`
+	Amount         string         `json:"amount"`
+	To             string         `json:"to"`
+	IdempotencyKey string         `json:"idempotency_key,omitempty"`
+	Metadata       map[string]any `json:"metadata,omitempty"`
+}
+
+// ListWithdrawalsOptions controls withdrawal list filtering.
+type ListWithdrawalsOptions struct {
+	UserID string
+	After  string
+}
+
+// Withdrawal is a treasury-safe payout request.
+type Withdrawal struct {
+	ID             string           `json:"id"`
+	ProjectID      string           `json:"project_id,omitempty"`
+	UserID         string           `json:"user_id"`
+	Token          string           `json:"token"`
+	ChainType      ChainType        `json:"chain_type"`
+	ChainID        string           `json:"chain_id,omitempty"`
+	Amount         string           `json:"amount"`
+	To             string           `json:"to"`
+	IdempotencyKey *string          `json:"idempotency_key,omitempty"`
+	Status         WithdrawalStatus `json:"status"`
+	PayoutWalletID *string          `json:"payout_wallet_id,omitempty"`
+	SigningJobID   *string          `json:"signing_job_id,omitempty"`
+	TxHash         *string          `json:"tx_hash,omitempty"`
+	Error          *string          `json:"error,omitempty"`
+	Metadata       map[string]any   `json:"metadata,omitempty"`
+	CreatedAt      string           `json:"created_at"`
+	UpdatedAt      string           `json:"updated_at"`
+}
+
+// WithdrawalList is the response from listing withdrawals.
+type WithdrawalList struct {
+	Withdrawals []Withdrawal `json:"withdrawals"`
 }

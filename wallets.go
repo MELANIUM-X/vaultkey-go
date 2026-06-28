@@ -115,8 +115,8 @@ func (w *WalletsService) BroadcastSolana(ctx context.Context, walletID, signedTx
 	return resp, apiErr, err
 }
 
-// Sweep triggers a sweep — moves all funds from the wallet to the configured
-// master wallet. The operation is async; poll via Jobs.Get(jobID).
+// Sweep triggers a sweep from a user wallet to the configured collection wallet.
+// The operation is async; poll via Jobs.Get(jobID).
 //
 // For EVM, provide chainName (preferred) or chainID.
 // For Solana, leave both chainName and chainID empty.

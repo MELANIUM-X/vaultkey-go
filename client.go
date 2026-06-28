@@ -29,6 +29,7 @@ type Client struct {
 	Jobs        *JobsService
 	Stablecoin  *StablecoinService
 	Chains      *ChainsService
+	Withdrawals *WithdrawalsService
 }
 
 // ClientOption configures the Client.
@@ -96,6 +97,7 @@ func NewClient(apiKey, apiSecret string, opts ...ClientOption) (*Client, error) 
 	c.Jobs = &JobsService{client: c}
 	c.Stablecoin = &StablecoinService{client: c}
 	c.Chains = &ChainsService{client: c}
+	c.Withdrawals = &WithdrawalsService{client: c}
 
 	return c, nil
 }

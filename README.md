@@ -204,7 +204,43 @@ result, _, _ := client.Jobs.Get(ctx, job.JobID)
 
 ---
 
+## Withdrawals
+
+Use withdrawals for outbound stablecoin payouts. VaultKey selects the payout
+wallet and applies treasury policy behind the API.
+
+```go
+withdrawal, apiErr, err := client.Withdrawals.Create(ctx, vaultkey.CreateWithdrawalPayload{
+    UserID:         "user_123",
+    Asset:          "usdc",
+    ChainType:      vaultkey.ChainTypeEVM,
+    ChainName:      "base",
+    Amount:         "100.00",
+    To:             "0x1111111111111111111111111111111111111111",
+    IdempotencyKey: "withdrawal_user_123_001",
+    Metadata: map[string]any{
+        "external_reference": "wd_001",
+    },
+})
+
+withdrawal, apiErr, err = client.Withdrawals.Get(ctx, withdrawal.ID)
+
+list, apiErr, err := client.Withdrawals.List(ctx, vaultkey.ListWithdrawalsOptions{
+    UserID: "user_123",
+})
+
+withdrawal, apiErr, err = client.Withdrawals.Cancel(ctx, withdrawal.ID)
+```
+
+Common statuses include `pending_approval`, `funding_required`, `funding`,
+`signing`, `completed`, `failed`, and `cancelled`.
+
+---
+
 ## Stablecoin
+
+Direct stablecoin transfers are a lower-level wallet operation. For normal
+outbound payouts, prefer `client.Withdrawals`.
 
 ```go
 // Transfer USDC on Base (gasless)
@@ -292,6 +328,7 @@ for _, c := range chains {
 |---|---|
 | `client.Wallets` | `Create`, `Get`, `ListByUser`, `EVMBalance`, `SolanaBalance`, `BroadcastEVM`, `BroadcastSolana`, `Sweep`, `Signing(id)` |
 | `client.Wallets.Signing(id)` | `EVMMessage`, `SolanaMessage` |
+| `client.Withdrawals` | `Create`, `Get`, `List`, `Cancel` |
 | `client.Stablecoin` | `Transfer`, `Balance` |
 | `client.Jobs` | `Get` |
 | `client.Chains` | `List` |

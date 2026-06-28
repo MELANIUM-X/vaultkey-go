@@ -75,37 +75,39 @@ func main() {
 	fmt.Printf("Solana sign job: %s\n", solJob.JobID)
 	pollJob(ctx, client, solJob.JobID)
 
-	// ── 5. Stablecoin transfer ────────────────────────────────────────────────
+	// ── 5. Withdrawal ─────────────────────────────────────────────────────────
 
-	transfer, apiErr, err := client.Stablecoin.Transfer(ctx, evmWallet.ID,
-		vaultkey.ChainTypeEVM,
-		vaultkey.StablecoinTransferPayload{
-			Token:          "usdc",
-			To:             "0xRecipientAddress",
-			Amount:         "10.00",
-			ChainName:      "base-sepolia",
-			Gasless:        true,
-			Speed:          vaultkey.SpeedNormal,
-			IdempotencyKey: "transfer-usdc-001",
+	withdrawal, apiErr, err := client.Withdrawals.Create(ctx, vaultkey.CreateWithdrawalPayload{
+		UserID:         "user_123",
+		Asset:          "usdc",
+		ChainType:      vaultkey.ChainTypeEVM,
+		ChainName:      "base-sepolia",
+		Amount:         "10.00",
+		To:             "0x1111111111111111111111111111111111111111",
+		IdempotencyKey: "withdrawal-user-123-001",
+		Metadata: map[string]any{
+			"external_reference": "wd_001",
 		},
-	)
-	mustOK("stablecoin transfer", apiErr, err)
-	fmt.Printf("Transfer job: %s\n", transfer.JobID)
-	pollJob(ctx, client, transfer.JobID)
+	})
+	mustOK("create withdrawal", apiErr, err)
+	fmt.Printf("Withdrawal: %s status=%s\n", withdrawal.ID, withdrawal.Status)
+
+	withdrawal, apiErr, err = client.Withdrawals.Get(ctx, withdrawal.ID)
+	mustOK("get withdrawal", apiErr, err)
+	fmt.Printf("Withdrawal status: %s\n", withdrawal.Status)
+
+	withdrawals, apiErr, err := client.Withdrawals.List(ctx, vaultkey.ListWithdrawalsOptions{
+		UserID: "user_123",
+	})
+	mustOK("list withdrawals", apiErr, err)
+	fmt.Printf("Found %d withdrawal(s)\n", len(withdrawals.Withdrawals))
 
 	// Balance after transfer
 	bal, apiErr, err := client.Stablecoin.Balance(ctx, evmWallet.ID,
 		vaultkey.ChainTypeEVM, "usdc", "base-sepolia", "",
 	)
 	mustOK("stablecoin balance", apiErr, err)
-	fmt.Printf("USDC balance after transfer: %s %s\n", bal.Balance, bal.Symbol)
-
-	// Master wallet stablecoin balance (reconciliation)
-	masterBal, apiErr, err := client.Stablecoin.MasterWalletBalance(ctx,
-		vaultkey.ChainTypeEVM, "usdc", "base-sepolia", "",
-	)
-	mustOK("master wallet balance", apiErr, err)
-	fmt.Printf("Master wallet USDC balance: %s %s\n", masterBal.Balance, masterBal.Symbol)
+	fmt.Printf("USDC balance: %s %s\n", bal.Balance, bal.Symbol)
 
 	// ── 6. Sweep ──────────────────────────────────────────────────────────────
 

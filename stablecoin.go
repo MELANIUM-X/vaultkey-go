@@ -81,8 +81,10 @@ func (s *StablecoinService) Balance(ctx context.Context, walletID string, chainT
 	return resp, apiErr, err
 }
 
-// MasterWalletBalance returns the stablecoin balance of the project's configured
-// master wallet for a given chain and token. Useful for reconciliation.
+// MasterWalletBalance returns the stablecoin balance of the project's legacy
+// master/collection wallet for a given chain and token.
+//
+// Deprecated: collection and treasury controls are managed outside the public SDK.
 //
 // For EVM, provide chainName (preferred) or chainID.
 // For Solana, leave both empty.
