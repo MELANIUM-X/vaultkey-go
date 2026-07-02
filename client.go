@@ -30,6 +30,7 @@ type Client struct {
 	Stablecoin  *StablecoinService
 	Chains      *ChainsService
 	Withdrawals *WithdrawalsService
+	Monitor     *MonitorService
 }
 
 // ClientOption configures the Client.
@@ -98,6 +99,7 @@ func NewClient(apiKey, apiSecret string, opts ...ClientOption) (*Client, error) 
 	c.Stablecoin = &StablecoinService{client: c}
 	c.Chains = &ChainsService{client: c}
 	c.Withdrawals = &WithdrawalsService{client: c}
+	c.Monitor = &MonitorService{client: c}
 
 	return c, nil
 }

@@ -55,6 +55,22 @@ const (
 	WithdrawalStatusRejected        WithdrawalStatus = "rejected"
 )
 
+// MonitorDirection controls which transaction directions trigger webhooks.
+type MonitorDirection string
+
+const (
+	MonitorDirectionIncoming MonitorDirection = "incoming"
+	MonitorDirectionOutgoing MonitorDirection = "outgoing"
+)
+
+// MonitorSubscriptionStatus is the lifecycle state of a monitor subscription.
+type MonitorSubscriptionStatus string
+
+const (
+	MonitorSubscriptionStatusActive   MonitorSubscriptionStatus = "active"
+	MonitorSubscriptionStatusInactive MonitorSubscriptionStatus = "inactive"
+)
+
 // ── Chains ────────────────────────────────────────────────────────────────────
 
 // Chain represents a supported EVM chain.
@@ -244,4 +260,37 @@ type Withdrawal struct {
 // WithdrawalList is the response from listing withdrawals.
 type WithdrawalList struct {
 	Withdrawals []Withdrawal `json:"withdrawals"`
+}
+
+// ── Monitor ─────────────────────────────────────────────────────────────────
+
+// MonitorSubscriptionPayload is the request body for wallet monitoring.
+//
+// Chain accepts "evm:<chainId>", "solana", or "tron".
+type MonitorSubscriptionPayload struct {
+	WalletID   string             `json:"wallet_id"`
+	Chain      string             `json:"chain"`
+	Directions []MonitorDirection `json:"directions"`
+	WebhookURL string             `json:"webhook_url,omitempty"`
+	MinAmount  string             `json:"min_amount,omitempty"`
+	Label      string             `json:"label,omitempty"`
+}
+
+// MonitorSubscription is a wallet transaction monitoring subscription.
+type MonitorSubscription struct {
+	ID         string                    `json:"subscription_id"`
+	WalletID   string                    `json:"wallet_id"`
+	Address    string                    `json:"address"`
+	Chain      string                    `json:"chain"`
+	Directions []MonitorDirection        `json:"directions"`
+	WebhookURL string                    `json:"webhook_url,omitempty"`
+	MinAmount  string                    `json:"min_amount"`
+	Label      string                    `json:"label,omitempty"`
+	Status     MonitorSubscriptionStatus `json:"status"`
+	CreatedAt  string                    `json:"created_at"`
+}
+
+// MonitorUnsubscribeResult is returned after removing a monitor subscription.
+type MonitorUnsubscribeResult struct {
+	Status string `json:"status"`
 }
