@@ -243,8 +243,10 @@ Subscribe wallets to incoming and/or outgoing transaction webhooks.
 
 ```go
 sub, apiErr, err := client.Monitor.Subscribe(ctx, vaultkey.MonitorSubscriptionPayload{
-    WalletID: "wallet_id",
-    Chain:    "evm:11155111",
+    WalletID:  "wallet_id",
+    ChainType: vaultkey.ChainTypeEVM,
+    ChainName: "sepolia",
+    // ChainID: "11155111", // optional fallback if you do not use ChainName
     Directions: []vaultkey.MonitorDirection{
         vaultkey.MonitorDirectionIncoming,
         vaultkey.MonitorDirectionOutgoing,

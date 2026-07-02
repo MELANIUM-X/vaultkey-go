@@ -266,10 +266,14 @@ type WithdrawalList struct {
 
 // MonitorSubscriptionPayload is the request body for wallet monitoring.
 //
-// Chain accepts "evm:<chainId>", "solana", or "tron".
+// For EVM, set ChainType to ChainTypeEVM and pass ChainName or ChainID from
+// the supported chains endpoint. For Solana and Tron, omit ChainName and
+// ChainID.
 type MonitorSubscriptionPayload struct {
 	WalletID   string             `json:"wallet_id"`
-	Chain      string             `json:"chain"`
+	ChainType  ChainType          `json:"chain_type"`
+	ChainName  string             `json:"chain_name,omitempty"`
+	ChainID    string             `json:"chain_id,omitempty"`
 	Directions []MonitorDirection `json:"directions"`
 	WebhookURL string             `json:"webhook_url,omitempty"`
 	MinAmount  string             `json:"min_amount,omitempty"`
@@ -281,7 +285,9 @@ type MonitorSubscription struct {
 	ID         string                    `json:"subscription_id"`
 	WalletID   string                    `json:"wallet_id"`
 	Address    string                    `json:"address"`
-	Chain      string                    `json:"chain"`
+	ChainType  ChainType                 `json:"chain_type"`
+	ChainName  string                    `json:"chain_name,omitempty"`
+	ChainID    string                    `json:"chain_id,omitempty"`
 	Directions []MonitorDirection        `json:"directions"`
 	WebhookURL string                    `json:"webhook_url,omitempty"`
 	MinAmount  string                    `json:"min_amount"`
