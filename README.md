@@ -237,6 +237,33 @@ Common statuses include `pending_approval`, `funding_required`, `funding`,
 
 ---
 
+## Monitor
+
+Subscribe wallets to incoming and/or outgoing transaction webhooks.
+
+```go
+sub, apiErr, err := client.Monitor.Subscribe(ctx, vaultkey.MonitorSubscriptionPayload{
+    WalletID: "wallet_id",
+    Chain:    "evm:11155111",
+    Directions: []vaultkey.MonitorDirection{
+        vaultkey.MonitorDirectionIncoming,
+        vaultkey.MonitorDirectionOutgoing,
+    },
+    WebhookURL: "https://example.com/webhook",
+    MinAmount:  "0",
+    Label:      "optional",
+})
+
+subs, apiErr, err := client.Monitor.List(ctx)
+
+sub, apiErr, err = client.Monitor.Get(ctx, sub.ID)
+
+result, apiErr, err := client.Monitor.Unsubscribe(ctx, sub.ID)
+fmt.Println(result.Status)
+```
+
+---
+
 ## Stablecoin
 
 Direct stablecoin transfers are a lower-level wallet operation. For normal
@@ -329,6 +356,7 @@ for _, c := range chains {
 | `client.Wallets` | `Create`, `Get`, `ListByUser`, `EVMBalance`, `SolanaBalance`, `BroadcastEVM`, `BroadcastSolana`, `Sweep`, `Signing(id)` |
 | `client.Wallets.Signing(id)` | `EVMMessage`, `SolanaMessage` |
 | `client.Withdrawals` | `Create`, `Get`, `List`, `Cancel` |
+| `client.Monitor` | `Subscribe`, `List`, `Get`, `Unsubscribe` |
 | `client.Stablecoin` | `Transfer`, `Balance` |
 | `client.Jobs` | `Get` |
 | `client.Chains` | `List` |
