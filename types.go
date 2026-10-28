@@ -1,12 +1,19 @@
 package vaultkey
 
+import "time"
+
 // ErrorResponse is returned by the API on non-2xx responses.
 type ErrorResponse struct {
-	Message string `json:"message"`
-	Code    string `json:"code"`
+	Message    string        `json:"message"`
+	Code       string        `json:"code"`
+	StatusCode int           `json:"-"`
+	RetryAfter time.Duration `json:"-"`
 }
 
 func (e *ErrorResponse) Error() string {
+	if e.Code == "" {
+		return e.Message
+	}
 	return e.Code + ": " + e.Message
 }
 

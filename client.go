@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -142,9 +143,35 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body any, v
 
 	// Attempt to decode a structured error body.
 	// Fall back to a generic error if decoding fails.
-	errResp := &ErrorResponse{Message: resp.Status, Code: "INTERNAL_SERVER_ERROR"}
-	_ = json.NewDecoder(resp.Body).Decode(errResp)
+	errResp := &ErrorResponse{Message: resp.Status, Code: "HTTP_" + strconv.Itoa(resp.StatusCode), StatusCode: resp.StatusCode,
+		RetryAfter: retryAfterDuration(resp.Header.Get("Retry-After"))}
+	var payload struct {
+		Error   string `json:"error"`
+		Message string `json:"message"`
+		Code    string `json:"code"`
+	}
+	_ = json.NewDecoder(io.LimitReader(resp.Body, 4096)).Decode(&payload)
+	if payload.Error != "" {
+		errResp.Message = payload.Error
+	}
+	if payload.Message != "" {
+		errResp.Message = payload.Message
+	}
+	if payload.Code != "" {
+		errResp.Code = payload.Code
+	}
 	return errResp, nil
+}
+
+func retryAfterDuration(value string) time.Duration {
+	value = strings.TrimSpace(value)
+	if seconds, err := strconv.Atoi(value); err == nil && seconds > 0 {
+		return time.Duration(seconds) * time.Second
+	}
+	if at, err := http.ParseTime(value); err == nil && at.After(time.Now()) {
+		return time.Until(at)
+	}
+	return 0
 }
 
 func (c *Client) get(ctx context.Context, path string, out any) (*ErrorResponse, error) {
